@@ -17,6 +17,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onGeoJsonLoaded }) => {
     shp?: File;
     dbf?: File;
     shx?: File;
+    prj?: File;
   }>({});
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -46,7 +47,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onGeoJsonLoaded }) => {
     
     files.forEach(file => {
       const extension = file.name.toLowerCase().split('.').pop();
-      if (extension === 'shp' || extension === 'dbf' || extension === 'shx') {
+      if (extension === 'shp' || extension === 'dbf' || extension === 'shx' || extension === 'prj') {
         newFiles[extension as keyof typeof newFiles] = file;
       }
     });
@@ -123,7 +124,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onGeoJsonLoaded }) => {
             <strong>Select multiple files</strong> or drag and drop here
           </p>
           <p className="text-xs text-muted-foreground">
-            Required: .shp, .dbf | Optional: .shx
+            Required: .shp, .dbf | Optional: .shx, .prj
           </p>
         </div>
         
@@ -131,7 +132,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onGeoJsonLoaded }) => {
           id="file-input"
           type="file"
           multiple
-          accept=".shp,.dbf,.shx"
+          accept=".shp,.dbf,.shx,.prj"
           onChange={handleFileInput}
           className="hidden"
         />
