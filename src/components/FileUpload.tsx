@@ -108,7 +108,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onGeoJsonLoaded }) => {
       </CardHeader>
       <CardContent className="space-y-4">
         <div
-          className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
+          className={`relative border-2 border-dashed rounded-lg p-6 text-center transition-colors cursor-pointer ${
             isDragging
               ? 'border-primary bg-primary/5'
               : 'border-muted-foreground/25 hover:border-primary/50'
@@ -116,22 +116,25 @@ const FileUpload: React.FC<FileUploadProps> = ({ onGeoJsonLoaded }) => {
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
+          onClick={() => document.getElementById('file-input')?.click()}
         >
           <Upload className="mx-auto h-8 w-8 text-muted-foreground mb-2" />
           <p className="text-sm text-muted-foreground mb-2">
-            Drag and drop your shapefile components here, or click to browse
+            <strong>Select multiple files</strong> or drag and drop here
           </p>
           <p className="text-xs text-muted-foreground">
             Required: .shp, .dbf | Optional: .shx
           </p>
-          <input
-            type="file"
-            multiple
-            accept=".shp,.dbf,.shx"
-            onChange={handleFileInput}
-            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-          />
         </div>
+        
+        <input
+          id="file-input"
+          type="file"
+          multiple
+          accept=".shp,.dbf,.shx"
+          onChange={handleFileInput}
+          className="hidden"
+        />
 
         {(uploadedFiles.shp || uploadedFiles.dbf || uploadedFiles.shx) && (
           <div className="space-y-2">
