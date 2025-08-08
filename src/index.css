@@ -157,4 +157,24 @@
   .map-container {
     @apply relative rounded-xl overflow-hidden shadow-medium;
   }
+  
+  /* Leaflet popup customization for ZIP analysis */
+  .leaflet-popup-content-wrapper {
+    @apply rounded-lg shadow-medium;
+    border-radius: 0.75rem !important;
+  }
+  
+  .leaflet-popup-tip {
+    @apply shadow-soft;
+  }
+  
+  .zip-popup .leaflet-popup-content {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  
+  .zip-popup .leaflet-popup-content-wrapper {
+    background: white !important;
+    border: 1px solid hsl(var(--border)) !important;
+  }
 }

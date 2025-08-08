@@ -1,15 +1,19 @@
 import React, { useCallback, useState } from 'react';
-import { Upload, FileText, AlertCircle } from 'lucide-react';
+import { Upload, FileText, AlertCircle, Database, Trash2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
 import * as shapefile from 'shapefile';
 
 interface FileUploadProps {
   onGeoJsonLoaded: (geoJson: any) => void;
+  hasCache?: boolean;
+  onClearCache?: () => void;
+  compact?: boolean;
 }
 
-const FileUpload: React.FC<FileUploadProps> = ({ onGeoJsonLoaded }) => {
+const FileUpload: React.FC<FileUploadProps> = ({ onGeoJsonLoaded, hasCache = false, onClearCache, compact = false }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -99,15 +103,121 @@ const FileUpload: React.FC<FileUploadProps> = ({ onGeoJsonLoaded }) => {
 
   const hasRequiredFiles = uploadedFiles.shp && uploadedFiles.dbf;
 
+  // Compact view when data is already loaded
+  if (compact && hasCache) {
+    return (
+      <Card className="w-full">
+        <CardContent className="py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
+                <Database className="h-4 w-4 text-green-600" />
+                <span className="text-sm font-medium">Data Loaded</span>
+              </div>
+              <Badge variant="secondary" className="text-xs">
+                Cached
+              </Badge>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => document.getElementById('file-input')?.click()}
+                className="h-8 px-3 text-xs"
+              >
+                <Upload className="h-3 w-3 mr-1" />
+                Replace
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onClearCache}
+                className="h-8 px-2"
+                title="Clear cached data"
+              >
+                <Trash2 className="h-3 w-3" />
+              </Button>
+            </div>
+          </div>
+          
+          <input
+            id="file-input"
+            type="file"
+            multiple
+            accept=".shp,.dbf,.shx,.prj"
+            onChange={handleFileInput}
+            className="hidden"
+          />
+          
+          {/* Show upload progress if files are being processed */}
+          {(uploadedFiles.shp || uploadedFiles.dbf) && (
+            <div className="mt-3 pt-3 border-t">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-sm">
+                  <FileText className="h-4 w-4 text-primary" />
+                  <span>New files selected</span>
+                </div>
+                <Button
+                  onClick={processShapefile}
+                  disabled={!hasRequiredFiles || isLoading}
+                  size="sm"
+                  className="h-8 px-3 text-xs"
+                >
+                  {isLoading ? 'Processing...' : 'Load'}
+                </Button>
+              </div>
+            </div>
+          )}
+          
+          {error && (
+            <Alert variant="destructive" className="mt-3">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription className="text-sm">{error}</AlertDescription>
+            </Alert>
+          )}
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Full view for initial upload
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Upload className="h-5 w-5" />
-          Upload Shapefile
+        <CardTitle className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Upload className="h-5 w-5" />
+            Upload Shapefile
+          </div>
+          {hasCache && (
+            <div className="flex items-center gap-2">
+              <Badge variant="secondary" className="flex items-center gap-1">
+                <Database className="h-3 w-3" />
+                Data Cached
+              </Badge>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onClearCache}
+                className="h-8 px-2"
+                title="Clear cached data"
+              >
+                <Trash2 className="h-3 w-3" />
+              </Button>
+            </div>
+          )}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
+        {hasCache && (
+          <Alert>
+            <Database className="h-4 w-4" />
+            <AlertDescription>
+              Data loaded from cache. Upload new files to replace cached data.
+            </AlertDescription>
+          </Alert>
+        )}
+        
         <div
           className={`relative border-2 border-dashed rounded-lg p-6 text-center transition-colors cursor-pointer ${
             isDragging

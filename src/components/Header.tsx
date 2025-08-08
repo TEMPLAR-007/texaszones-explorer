@@ -20,21 +20,17 @@ const Header: React.FC<HeaderProps> = ({ zoneCount = 0 }) => {
                 Texas Elementary Zones
               </h1>
               <p className="text-sm text-muted-foreground">
-                Marketing Insights & Analysis Tool
+                Marketing Insights & Analysis WebGIS Tool
               </p>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-4">
             {zoneCount > 0 && (
               <div className="text-sm text-muted-foreground">
                 <span className="font-medium text-foreground">{zoneCount}</span> zones loaded
               </div>
             )}
-            <Button variant="hero" size="sm" className="hidden sm:flex">
-              <BarChart3 className="h-4 w-4" />
-              Generate Report
-            </Button>
           </div>
         </div>
       </div>
