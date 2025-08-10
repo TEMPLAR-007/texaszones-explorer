@@ -7,6 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Database, Search, Eye } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
+import OverviewMap from './OverviewMap';
 
 interface DataExplorerProps {
   geoJsonData?: any;
@@ -152,6 +153,12 @@ const DataExplorer: React.FC<DataExplorerProps> = ({ geoJsonData, onZipSelect })
           </div>
         </CardContent>
       </Card>
+
+      {/* Overview Map */}
+      <OverviewMap 
+        geoJsonData={geoJsonData}
+        onZipSelect={onZipSelect}
+      />
 
       {/* Data Table */}
       <Card>

@@ -83,7 +83,7 @@ const ZipMapView: React.FC<ZipMapViewProps> = ({ zipCode, zipData, geoJsonData }
       },
       onEachFeature: (feature, layer) => {
         const properties = feature.properties || {};
-        
+
         // Create detailed popup with processed summary
         const popupContent = `
           <div style="font-family: system-ui; max-width: 300px;">
@@ -92,21 +92,25 @@ const ZipMapView: React.FC<ZipMapViewProps> = ({ zipCode, zipData, geoJsonData }
             </h3>
             
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">
+              <div style="background: #dcfce7; padding: 8px; border-radius: 4px; text-align: center;">
+                <div style="font-size: 20px; font-weight: bold; color: #16a34a;">${zipData.totalStudents}</div>
+                <div style="font-size: 12px; color: #6b7280;">Total Population</div>
+              </div>
               <div style="background: #dbeafe; padding: 8px; border-radius: 4px; text-align: center;">
-                <div style="font-size: 18px; font-weight: bold; color: #1d4ed8;">${zipData.count}</div>
+                <div style="font-size: 18px; font-weight: bold; color: #1d4ed8;">${zipData.processedTotals?.get('Schl_Cn') || 0}</div>
+                <div style="font-size: 11px; color: #6b7280;">Schools</div>
+              </div>
+              <div style="background: #fef3c7; padding: 8px; border-radius: 4px; text-align: center;">
+                <div style="font-size: 18px; font-weight: bold; color: #d97706;">${zipData.count}</div>
                 <div style="font-size: 11px; color: #6b7280;">Records</div>
               </div>
-              <div style="background: #dcfce7; padding: 8px; border-radius: 4px; text-align: center;">
-                <div style="font-size: 18px; font-weight: bold; color: #16a34a;">${zipData.totalStudents}</div>
-                <div style="font-size: 11px; color: #6b7280;">Students</div>
-              </div>
-              <div style="background: #fce7f3; padding: 8px; border-radius: 4px; text-align: center;">
-                <div style="font-size: 18px; font-weight: bold; color: #be185d;">${zipData.totalFemale}</div>
-                <div style="font-size: 11px; color: #6b7280;">Female</div>
-              </div>
-              <div style="background: #fed7aa; padding: 8px; border-radius: 4px; text-align: center;">
-                <div style="font-size: 18px; font-weight: bold; color: #ea580c;">${zipData.totalMale}</div>
-                <div style="font-size: 11px; color: #6b7280;">Male</div>
+              <div style="background: #f3e8ff; padding: 8px; border-radius: 4px; text-align: center;">
+                <div style="font-size: 18px; font-weight: bold; color: #7c3aed;">
+                  ${zipData.totalStudents > 0 && zipData.processedTotals?.get('Schl_Cn') > 0
+            ? Math.round(zipData.totalStudents / zipData.processedTotals.get('Schl_Cn'))
+            : 0}
+                </div>
+                <div style="font-size: 11px; color: #6b7280;">Avg/School</div>
               </div>
             </div>
             
@@ -127,14 +131,14 @@ const ZipMapView: React.FC<ZipMapViewProps> = ({ zipCode, zipData, geoJsonData }
             </div>
           </div>
         `;
-        
+
         layer.bindPopup(popupContent, {
           maxWidth: 320,
           className: 'zip-popup'
         });
 
         // Add hover effects
-        layer.on('mouseover', function(e) {
+        layer.on('mouseover', function (e) {
           const layer = e.target;
           layer.setStyle({
             weight: 4,
@@ -142,7 +146,7 @@ const ZipMapView: React.FC<ZipMapViewProps> = ({ zipCode, zipData, geoJsonData }
           });
         });
 
-        layer.on('mouseout', function(e) {
+        layer.on('mouseout', function (e) {
           const layer = e.target;
           layer.setStyle({
             weight: 3,
@@ -159,7 +163,7 @@ const ZipMapView: React.FC<ZipMapViewProps> = ({ zipCode, zipData, geoJsonData }
     const bounds = layer.getBounds();
     if (bounds.isValid()) {
       const center = bounds.getCenter();
-      
+
       // Create a custom HTML marker with key statistics
       const labelHtml = `
         <div style="
@@ -181,7 +185,7 @@ const ZipMapView: React.FC<ZipMapViewProps> = ({ zipCode, zipData, geoJsonData }
             <div style="color: #ea580c;">${zipData.processedTotals?.get('Schl_Cn') || 0} Schools</div>
           </div>
           <div style="font-size: 9px; color: #6b7280; margin-top: 2px;">
-            ${zipData.totalFemale}F / ${zipData.totalMale}M
+            Total Population: ${zipData.totalStudents}
           </div>
         </div>
       `;
@@ -194,7 +198,7 @@ const ZipMapView: React.FC<ZipMapViewProps> = ({ zipCode, zipData, geoJsonData }
       });
 
       const labelMarker = L.marker(center, { icon: labelIcon }).addTo(mapInstanceRef.current);
-      
+
       // Store reference to remove later
       if (!mapInstanceRef.current.zipLabelMarker) {
         mapInstanceRef.current.zipLabelMarker = labelMarker;
@@ -207,7 +211,7 @@ const ZipMapView: React.FC<ZipMapViewProps> = ({ zipCode, zipData, geoJsonData }
     // Fit map to layer bounds
     const layerBounds = layer.getBounds();
     if (layerBounds.isValid()) {
-      mapInstanceRef.current.fitBounds(layerBounds, { 
+      mapInstanceRef.current.fitBounds(layerBounds, {
         padding: [20, 20],
         maxZoom: 12 // Don't zoom in too much
       });
