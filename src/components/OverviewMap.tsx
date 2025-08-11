@@ -404,8 +404,7 @@ const OverviewMap: React.FC<OverviewMapProps> = ({ geoJsonData, onZipSelect }) =
 
     return (
         <div className="space-y-4">
-            {/* Multi-Select ZIP Search */}
-            <Card>
+            {/* <Card>
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                         <Search className="h-5 w-5" />
@@ -413,7 +412,6 @@ const OverviewMap: React.FC<OverviewMapProps> = ({ geoJsonData, onZipSelect }) =
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                    {/* Search Input */}
                     <div className="flex items-center gap-2">
                         <div className="relative flex-1">
                             <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -472,7 +470,6 @@ const OverviewMap: React.FC<OverviewMapProps> = ({ geoJsonData, onZipSelect }) =
                         </Button>
                     </div>
 
-                    {/* Search Results */}
                     {searchTerm && (
                         <div className="max-h-32 overflow-y-auto border rounded p-2">
                             <div className="flex flex-wrap gap-1">
@@ -500,7 +497,6 @@ const OverviewMap: React.FC<OverviewMapProps> = ({ geoJsonData, onZipSelect }) =
                         </div>
                     )}
 
-                    {/* Selected ZIPs */}
                     {selectedZips.length > 0 && (
                         <div className="space-y-2">
                             <div className="text-sm font-medium">Selected ZIP Codes ({selectedZips.length}):</div>
@@ -521,7 +517,7 @@ const OverviewMap: React.FC<OverviewMapProps> = ({ geoJsonData, onZipSelect }) =
                         </div>
                     )}
                 </CardContent>
-            </Card>
+            </Card> */}
 
             {/* Aggregated Analysis View */}
             {showAggregatedView && aggregatedData && (
@@ -1068,33 +1064,11 @@ const OverviewMap: React.FC<OverviewMapProps> = ({ geoJsonData, onZipSelect }) =
                             <div className="flex items-center gap-2 text-xs">
                                 <div className="w-4 h-4 bg-purple-500 rounded border-2 border-purple-700"></div>
                                 <span>Selected ZIP</span>
+
+                                <span className="text-muted-foreground">Zoom: {currentZoom}</span>
                             </div>
                         </div>
-                        <div className="mt-2 space-y-2">
-                            <div className="flex items-center justify-between text-xs">
-                                <span className="text-muted-foreground">
-                                    💡 Click ZIP areas on the map to select multiple zones for aggregated analysis
-                                </span>
-                                <div className="flex items-center gap-2">
-                                    <span className="text-muted-foreground">Zoom: {currentZoom}</span>
-                                    <Badge variant={showLabels ? "default" : "secondary"} className="text-xs">
-                                        {showLabels ? "Labels ON" : "Labels OFF"}
-                                    </Badge>
-                                    <select
-                                        value={performanceMode}
-                                        onChange={(e) => setPerformanceMode(e.target.value as 'high' | 'medium' | 'low')}
-                                        className="text-xs border rounded px-1 py-0.5"
-                                    >
-                                        <option value="high">High Performance</option>
-                                        <option value="medium">Balanced</option>
-                                        <option value="low">Show More Labels</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div className="text-xs text-muted-foreground text-center">
-                                ⚡ ZIP labels appear when zoomed in (level 9+) for better performance
-                            </div>
-                        </div>
+
                     </div>
                 </CardContent>
             </Card>
