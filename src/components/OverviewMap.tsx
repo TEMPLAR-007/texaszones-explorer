@@ -404,7 +404,7 @@ const OverviewMap: React.FC<OverviewMapProps> = ({ geoJsonData, onZipSelect }) =
 
     return (
         <div className="space-y-4">
-            {/* <Card>
+            <Card>
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                         <Search className="h-5 w-5" />
@@ -435,7 +435,7 @@ const OverviewMap: React.FC<OverviewMapProps> = ({ geoJsonData, onZipSelect }) =
                         >
                             Clear All
                         </Button>
-                        <Button
+                        {/* <Button
                             onClick={() => {
                                 setShowAggregatedView(true);
                                 // Zoom map to show only selected ZIP codes
@@ -467,7 +467,7 @@ const OverviewMap: React.FC<OverviewMapProps> = ({ geoJsonData, onZipSelect }) =
                         >
                             <BarChart3 className="h-4 w-4 mr-2" />
                             Analyze ({selectedZips.length})
-                        </Button>
+                        </Button> */}
                     </div>
 
                     {searchTerm && (
@@ -517,7 +517,7 @@ const OverviewMap: React.FC<OverviewMapProps> = ({ geoJsonData, onZipSelect }) =
                         </div>
                     )}
                 </CardContent>
-            </Card> */}
+            </Card>
 
             {/* Aggregated Analysis View */}
             {showAggregatedView && aggregatedData && (
