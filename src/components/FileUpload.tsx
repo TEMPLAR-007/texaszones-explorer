@@ -1,10 +1,11 @@
-import React, { useCallback, useState } from 'react';
-import { Upload, FileText, AlertCircle, Database, Trash2 } from 'lucide-react';
+import React, { useCallback, useState, useEffect } from 'react';
+import { Upload, FileText, AlertCircle, Database, Trash2, Download } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import * as shapefile from 'shapefile';
+import { loadShapefileFromPublic, checkShapefileExists } from '@/utils/shapefileLoader';
 
 interface FileUploadProps {
   onGeoJsonLoaded: (geoJson: any) => void;
@@ -23,6 +24,43 @@ const FileUpload: React.FC<FileUploadProps> = ({ onGeoJsonLoaded, hasCache = fal
     shx?: File;
     prj?: File;
   }>({});
+  const [hasPublicData, setHasPublicData] = useState(false);
+  const [isCheckingPublicData, setIsCheckingPublicData] = useState(true);
+
+  // Check for public data on component mount
+  useEffect(() => {
+    const checkPublicData = async () => {
+      try {
+        const exists = await checkShapefileExists();
+        setHasPublicData(exists);
+        console.log('📁 Public shapefile data available:', exists);
+      } catch (error) {
+        console.error('Error checking public data:', error);
+        setHasPublicData(false);
+      } finally {
+        setIsCheckingPublicData(false);
+      }
+    };
+
+    checkPublicData();
+  }, []);
+
+  const loadPublicData = async () => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      console.log('🔄 Loading shapefile from public folder...');
+      const geoJson = await loadShapefileFromPublic();
+      onGeoJsonLoaded(geoJson);
+      console.log('✅ Successfully loaded public shapefile data');
+    } catch (err) {
+      console.error('❌ Error loading public shapefile:', err);
+      setError('Failed to load shapefile from public folder. Please try uploading files manually.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -48,14 +86,14 @@ const FileUpload: React.FC<FileUploadProps> = ({ onGeoJsonLoaded, hasCache = fal
 
   const handleFiles = (files: File[]) => {
     const newFiles = { ...uploadedFiles };
-    
+
     files.forEach(file => {
       const extension = file.name.toLowerCase().split('.').pop();
       if (extension === 'shp' || extension === 'dbf' || extension === 'shx' || extension === 'prj') {
         newFiles[extension as keyof typeof newFiles] = file;
       }
     });
-    
+
     setUploadedFiles(newFiles);
     setError(null);
   };
@@ -72,9 +110,13 @@ const FileUpload: React.FC<FileUploadProps> = ({ onGeoJsonLoaded, hasCache = fal
     try {
       const shpBuffer = await uploadedFiles.shp.arrayBuffer();
       const dbfBuffer = await uploadedFiles.dbf.arrayBuffer();
-      
-      const features: any[] = [];
-      
+
+      const features: Array<{
+        type: string;
+        geometry: unknown;
+        properties: Record<string, unknown>;
+      }> = [];
+
       await shapefile.read(shpBuffer, dbfBuffer)
         .then((collection) => {
           if (collection.features) {
@@ -139,7 +181,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onGeoJsonLoaded, hasCache = fal
               </Button>
             </div>
           </div>
-          
+
           <input
             id="file-input"
             type="file"
@@ -148,7 +190,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onGeoJsonLoaded, hasCache = fal
             onChange={handleFileInput}
             className="hidden"
           />
-          
+
           {/* Show upload progress if files are being processed */}
           {(uploadedFiles.shp || uploadedFiles.dbf) && (
             <div className="mt-3 pt-3 border-t">
@@ -168,7 +210,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onGeoJsonLoaded, hasCache = fal
               </div>
             </div>
           )}
-          
+
           {error && (
             <Alert variant="destructive" className="mt-3">
               <AlertCircle className="h-4 w-4" />
@@ -217,13 +259,33 @@ const FileUpload: React.FC<FileUploadProps> = ({ onGeoJsonLoaded, hasCache = fal
             </AlertDescription>
           </Alert>
         )}
-        
+
+        {/* Public Data Option */}
+        {!isCheckingPublicData && hasPublicData && !hasCache && (
+          <Alert className="border-blue-200 bg-blue-50">
+            <Download className="h-4 w-4 text-blue-600" />
+            <AlertDescription className="flex items-center justify-between">
+              <span className="text-blue-800">
+                Pre-loaded shapefile data is available in the public folder.
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={loadPublicData}
+                disabled={isLoading}
+                className="ml-2 h-8 px-3 text-xs border-blue-300 text-blue-700 hover:bg-blue-100"
+              >
+                {isLoading ? 'Loading...' : 'Load Public Data'}
+              </Button>
+            </AlertDescription>
+          </Alert>
+        )}
+
         <div
-          className={`relative border-2 border-dashed rounded-lg p-6 text-center transition-colors cursor-pointer ${
-            isDragging
-              ? 'border-primary bg-primary/5'
-              : 'border-muted-foreground/25 hover:border-primary/50'
-          }`}
+          className={`relative border-2 border-dashed rounded-lg p-6 text-center transition-colors cursor-pointer ${isDragging
+            ? 'border-primary bg-primary/5'
+            : 'border-muted-foreground/25 hover:border-primary/50'
+            }`}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
@@ -237,7 +299,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onGeoJsonLoaded, hasCache = fal
             Required: .shp, .dbf | Optional: .shx, .prj
           </p>
         </div>
-        
+
         <input
           id="file-input"
           type="file"

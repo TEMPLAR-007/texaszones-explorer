@@ -4,6 +4,7 @@ import FileUpload from '@/components/FileUpload';
 import DataExplorer from '@/components/DataExplorer';
 import ZipCodeAnalyzer from '@/components/ZipCodeAnalyzer';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { loadShapefileFromPublic, checkShapefileExists } from '@/utils/shapefileLoader';
 
 const DB_NAME = 'TexasZonesDB';
 const DB_VERSION = 1;
@@ -153,6 +154,28 @@ const Index = () => {
           console.log('✅ Successfully loaded data from IndexedDB cache');
         } else {
           console.log('📭 No cached data found in IndexedDB');
+
+          // Try to load from public folder if no cache exists
+          try {
+            console.log('🔍 Checking for public shapefile data...');
+            const hasPublicData = await checkShapefileExists();
+
+            if (hasPublicData) {
+              console.log('📁 Public shapefile data found, loading automatically...');
+              const publicGeoJson = await loadShapefileFromPublic();
+
+              setOriginalGeoJson(publicGeoJson);
+              setFilteredGeoJson(publicGeoJson);
+
+              // Save to cache for future use
+              await saveToIndexedDB(publicGeoJson);
+              console.log('✅ Successfully loaded and cached public shapefile data');
+            } else {
+              console.log('📭 No public shapefile data found');
+            }
+          } catch (publicError) {
+            console.error('❌ Error loading public shapefile data:', publicError);
+          }
         }
       } catch (error) {
         console.error('❌ Error loading from IndexedDB cache:', error);
