@@ -90,11 +90,11 @@ const ZipMapView: React.FC<ZipMapViewProps> = ({ zipCode, zipData, geoJsonData }
             <h3 style="margin: 0 0 10px 0; color: #1f2937; font-size: 16px; font-weight: bold;">
               ZIP Code ${zipCode}
             </h3>
-            
+
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">
               <div style="background: #dcfce7; padding: 8px; border-radius: 4px; text-align: center;">
-                <div style="font-size: 20px; font-weight: bold; color: #16a34a;">${zipData.totalStudents}</div>
-                <div style="font-size: 12px; color: #6b7280;">Total Population</div>
+                <div style="font-size: 20px; font-weight: bold; color: #16a34a;">${zipData.population}</div>
+                <div style="font-size: 12px; color: #6b7280;">Population</div>
               </div>
               <div style="background: #dbeafe; padding: 8px; border-radius: 4px; text-align: center;">
                 <div style="font-size: 18px; font-weight: bold; color: #1d4ed8;">${zipData.processedTotals?.get('Schl_Cn') || 0}</div>
@@ -113,16 +113,16 @@ const ZipMapView: React.FC<ZipMapViewProps> = ({ zipCode, zipData, geoJsonData }
                 <div style="font-size: 11px; color: #6b7280;">Avg/School</div>
               </div>
             </div>
-            
+
             <div style="border-top: 1px solid #e5e7eb; padding-top: 8px;">
               <div style="font-size: 12px; color: #6b7280; margin-bottom: 4px;"><strong>Grade Levels:</strong></div>
               <div style="font-size: 11px; color: #374151;">
-                Pre-K: ${zipData.processedTotals?.get('Pre_K') || 0} | 
-                KG: ${zipData.processedTotals?.get('KG') || 0} | 
+                Pre-K: ${zipData.processedTotals?.get('Pre_K') || 0} |
+                KG: ${zipData.processedTotals?.get('KG') || 0} |
                 Grade 1-3: ${(zipData.processedTotals?.get('Grade_1') || 0) + (zipData.processedTotals?.get('Grade_2') || 0) + (zipData.processedTotals?.get('Grade_3') || 0)}
               </div>
             </div>
-            
+
             <div style="border-top: 1px solid #e5e7eb; padding-top: 8px; margin-top: 8px;">
               <div style="font-size: 11px; color: #6b7280;">
                 <strong>School Count:</strong> ${zipData.processedTotals?.get('Schl_Cn') || 0}<br>
@@ -185,7 +185,7 @@ const ZipMapView: React.FC<ZipMapViewProps> = ({ zipCode, zipData, geoJsonData }
             <div style="color: #ea580c;">${zipData.processedTotals?.get('Schl_Cn') || 0} Schools</div>
           </div>
           <div style="font-size: 9px; color: #6b7280; margin-top: 2px;">
-            Total Population: ${zipData.totalStudents}
+            Population: ${zipData.population}
           </div>
         </div>
       `;

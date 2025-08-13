@@ -117,7 +117,7 @@ const OverviewMap: React.FC<OverviewMapProps> = ({ geoJsonData, onZipSelect }) =
                     // Optimize numeric parsing with correct field names
                     const female = +(props.Female || 0);
                     const male = +(props.Male || 0);
-                    const totalStudents = +(props.Ttl_Std || 0);
+                    const totalStudents = female + male; // Calculate from actual student counts
                     const population = +(props.pop || 0);
 
                     zipInfo.totalFemale += female;
@@ -542,7 +542,7 @@ const OverviewMap: React.FC<OverviewMapProps> = ({ geoJsonData, onZipSelect }) =
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                             <div className="text-center p-4 bg-blue-50 rounded-lg">
                                 <p className="text-2xl font-bold text-blue-600">{aggregatedData.totalPopulation}</p>
-                                <p className="text-sm text-muted-foreground">Total Population</p>
+                                <p className="text-sm text-muted-foreground">Population</p>
                             </div>
                             <div className="text-center p-4 bg-green-50 rounded-lg">
                                 <p className="text-2xl font-bold text-green-600">{aggregatedData.totalStudents}</p>

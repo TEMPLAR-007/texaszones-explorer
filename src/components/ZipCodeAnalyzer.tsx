@@ -42,9 +42,11 @@ const ZipCodeAnalyzer: React.FC<ZipCodeAnalyzerProps> = ({ geoJsonData, onZipSel
           zip,
           rawRecords: [],
           count: 0,
+          population: 0,
           totalStudents: 0,
           totalFemale: 0,
           totalMale: 0,
+          totalSchools: 0,
           totalPreK: 0,
           totalKG: 0,
           totalGrade1: 0,
@@ -71,6 +73,8 @@ const ZipCodeAnalyzer: React.FC<ZipCodeAnalyzerProps> = ({ geoJsonData, onZipSel
 
       const female = parseInt(props.Female || 0);
       const male = parseInt(props.Male || 0);
+      const population = parseInt(props.pop || 0);
+      const schools = parseInt(props.Schl_Cn || 0);
       const preK = parseInt(props.Pre_K || 0);
       const kg = parseInt(props.KG || 0);
       const grade1 = parseInt(props.Grade_1 || 0);
@@ -79,6 +83,8 @@ const ZipCodeAnalyzer: React.FC<ZipCodeAnalyzerProps> = ({ geoJsonData, onZipSel
 
       zipInfo.totalFemale += female;
       zipInfo.totalMale += male;
+      zipInfo.population += population;
+      zipInfo.totalSchools += schools;
       zipInfo.totalPreK += preK;
       zipInfo.totalKG += kg;
       zipInfo.totalGrade1 += grade1;
@@ -192,14 +198,18 @@ const ZipCodeAnalyzer: React.FC<ZipCodeAnalyzerProps> = ({ geoJsonData, onZipSel
         </CardHeader>
         <CardContent>
           {/* Summary Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
             <div className="text-center p-4 bg-blue-50 rounded-lg">
-              <p className="text-2xl font-bold text-blue-600">{selectedZipData.count}</p>
-              <p className="text-sm text-muted-foreground">Records</p>
+              <p className="text-2xl font-bold text-blue-600">{selectedZipData.population}</p>
+              <p className="text-sm text-muted-foreground">Population</p>
             </div>
             <div className="text-center p-4 bg-green-50 rounded-lg">
               <p className="text-2xl font-bold text-green-600">{selectedZipData.totalStudents}</p>
               <p className="text-sm text-muted-foreground">Total Students</p>
+            </div>
+            <div className="text-center p-4 bg-red-50 rounded-lg">
+              <p className="text-2xl font-bold text-red-600">{selectedZipData.totalSchools}</p>
+              <p className="text-sm text-muted-foreground">Schools</p>
             </div>
             <div className="text-center p-4 bg-purple-50 rounded-lg">
               <p className="text-2xl font-bold text-purple-600">{selectedZipData.totalFemale}</p>
