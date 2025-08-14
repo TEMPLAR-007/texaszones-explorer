@@ -7,6 +7,14 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { MapPin, Search, X, BarChart3, Eye, Calculator } from 'lucide-react';
+import {
+    ChartContainer,
+    ChartLegend,
+    ChartLegendContent,
+    ChartTooltip,
+    ChartTooltipContent,
+} from '@/components/ui/chart';
+import { BarChart as ReBarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 
 // Fix for default markers in Leaflet
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -435,7 +443,7 @@ const OverviewMap: React.FC<OverviewMapProps> = ({ geoJsonData, onZipSelect }) =
                         >
                             Clear All
                         </Button>
-                        {/* <Button
+                        <Button
                             onClick={() => {
                                 setShowAggregatedView(true);
                                 // Zoom map to show only selected ZIP codes
@@ -467,7 +475,7 @@ const OverviewMap: React.FC<OverviewMapProps> = ({ geoJsonData, onZipSelect }) =
                         >
                             <BarChart3 className="h-4 w-4 mr-2" />
                             Analyze ({selectedZips.length})
-                        </Button> */}
+                        </Button>
                     </div>
 
                     {searchTerm && (
@@ -804,183 +812,57 @@ const OverviewMap: React.FC<OverviewMapProps> = ({ geoJsonData, onZipSelect }) =
                                         </CardContent>
                                     </Card>
 
-                                    {/* Schools vs Students Scatter */}
+                                    {/* Schools vs Students Bar Chart */}
                                     <Card>
                                         <CardHeader>
                                             <CardTitle className="text-sm">Schools vs Students Distribution</CardTitle>
                                         </CardHeader>
                                         <CardContent>
-                                            <div className="relative h-48 bg-white rounded border">
-                                                {(() => {
-                                                    // Get and sort data points by ZIP code
-                                                    const dataPoints = selectedZips.map(zip => {
+                                            {(() => {
+                                                const dataPoints = selectedZips
+                                                    .map(zip => {
                                                         const zipData = zipSummaries.get(zip);
-                                                        if (!zipData) return null;
-
+                                                        if (!zipData) return null as any;
                                                         const schools = Math.round(zipData.schools / zipData.count) || 0;
                                                         const students = zipData.totalStudents || 0;
-
                                                         return { zip, schools, students };
-                                                    }).filter(Boolean).sort((a, b) => a.zip.localeCompare(b.zip));
+                                                    })
+                                                    .filter(Boolean)
+                                                    .sort((a: any, b: any) => a.zip.localeCompare(b.zip));
 
-                                                    if (dataPoints.length === 0) {
-                                                        return (
-                                                            <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
-                                                                Select ZIP codes to see line chart
-                                                            </div>
-                                                        );
-                                                    }
-
-                                                    // Calculate scales - normalize both to same scale
-                                                    const maxStudents = Math.max(...dataPoints.map(d => d.students));
-                                                    const maxSchools = Math.max(...dataPoints.map(d => d.schools));
-
+                                                if (dataPoints.length === 0) {
                                                     return (
-                                                        <>
-                                                            {/* Chart area */}
-                                                            <div className="absolute inset-6">
-                                                                {/* Grid lines */}
-                                                                <div className="absolute inset-0 pointer-events-none">
-                                                                    {[25, 50, 75].map(y => (
-                                                                        <div key={y} className="absolute w-full h-px bg-gray-200" style={{ top: `${y}%` }}></div>
-                                                                    ))}
-                                                                </div>
-
-                                                                {/* Students Line */}
-                                                                {dataPoints.map((point, index) => {
-                                                                    const x = (index / (dataPoints.length - 1 || 1)) * 100;
-                                                                    const studentY = maxStudents > 0 ? (100 - (point.students / maxStudents * 80)) : 50;
-
-                                                                    return (
-                                                                        <React.Fragment key={`student-${point.zip}`}>
-                                                                            {/* Student Line Point */}
-                                                                            <div
-                                                                                className="absolute w-4 h-4 bg-blue-500 border-2 border-white rounded-full shadow-md hover:bg-blue-600 hover:scale-125 transition-all cursor-pointer z-10"
-                                                                                style={{
-                                                                                    left: `${x}%`,
-                                                                                    top: `${studentY}%`,
-                                                                                    transform: 'translate(-50%, -50%)'
-                                                                                }}
-                                                                                title={`ZIP ${point.zip}: ${point.students} students`}
-                                                                            >
-                                                                                <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 text-xs font-bold text-blue-700 opacity-0 hover:opacity-100 transition-opacity bg-white px-2 py-1 rounded shadow whitespace-nowrap">
-                                                                                    {point.students}
-                                                                                </div>
-                                                                            </div>
-
-                                                                            {/* Connect student line points */}
-                                                                            {index < dataPoints.length - 1 && (() => {
-                                                                                const nextPoint = dataPoints[index + 1];
-                                                                                const nextX = ((index + 1) / (dataPoints.length - 1 || 1)) * 100;
-                                                                                const nextStudentY = maxStudents > 0 ? (100 - (nextPoint.students / maxStudents * 80)) : 50;
-
-                                                                                const deltaX = nextX - x;
-                                                                                const deltaY = nextStudentY - studentY;
-                                                                                const length = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-                                                                                const angle = Math.atan2(deltaY, deltaX) * 180 / Math.PI;
-
-                                                                                return (
-                                                                                    <div
-                                                                                        className="absolute h-0.5 bg-blue-500 origin-left"
-                                                                                        style={{
-                                                                                            left: `${x}%`,
-                                                                                            top: `${studentY}%`,
-                                                                                            width: `${length}%`,
-                                                                                            transform: `rotate(${angle}deg)`
-                                                                                        }}
-                                                                                    ></div>
-                                                                                );
-                                                                            })()}
-                                                                        </React.Fragment>
-                                                                    );
-                                                                })}
-
-                                                                {/* Schools Line */}
-                                                                {dataPoints.map((point, index) => {
-                                                                    const x = (index / (dataPoints.length - 1 || 1)) * 100;
-                                                                    const schoolY = maxSchools > 0 ? (100 - (point.schools / maxSchools * 80)) : 50;
-
-                                                                    return (
-                                                                        <React.Fragment key={`school-${point.zip}`}>
-                                                                            {/* School Line Point */}
-                                                                            <div
-                                                                                className="absolute w-4 h-4 bg-red-500 border-2 border-white rounded-full shadow-md hover:bg-red-600 hover:scale-125 transition-all cursor-pointer z-10"
-                                                                                style={{
-                                                                                    left: `${x}%`,
-                                                                                    top: `${schoolY}%`,
-                                                                                    transform: 'translate(-50%, -50%)'
-                                                                                }}
-                                                                                title={`ZIP ${point.zip}: ${point.schools} schools`}
-                                                                            >
-                                                                                <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 text-xs font-bold text-red-700 opacity-0 hover:opacity-100 transition-opacity bg-white px-2 py-1 rounded shadow whitespace-nowrap">
-                                                                                    {point.schools}
-                                                                                </div>
-                                                                            </div>
-
-                                                                            {/* Connect school line points */}
-                                                                            {index < dataPoints.length - 1 && (() => {
-                                                                                const nextPoint = dataPoints[index + 1];
-                                                                                const nextX = ((index + 1) / (dataPoints.length - 1 || 1)) * 100;
-                                                                                const nextSchoolY = maxSchools > 0 ? (100 - (nextPoint.schools / maxSchools * 80)) : 50;
-
-                                                                                const deltaX = nextX - x;
-                                                                                const deltaY = nextSchoolY - schoolY;
-                                                                                const length = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-                                                                                const angle = Math.atan2(deltaY, deltaX) * 180 / Math.PI;
-
-                                                                                return (
-                                                                                    <div
-                                                                                        className="absolute h-0.5 bg-red-500 origin-left"
-                                                                                        style={{
-                                                                                            left: `${x}%`,
-                                                                                            top: `${schoolY}%`,
-                                                                                            width: `${length}%`,
-                                                                                            transform: `rotate(${angle}deg)`
-                                                                                        }}
-                                                                                    ></div>
-                                                                                );
-                                                                            })()}
-                                                                        </React.Fragment>
-                                                                    );
-                                                                })}
-
-                                                                {/* ZIP Code Labels */}
-                                                                {dataPoints.map((point, index) => {
-                                                                    const x = (index / (dataPoints.length - 1 || 1)) * 100;
-
-                                                                    return (
-                                                                        <div
-                                                                            key={`label-${point.zip}`}
-                                                                            className="absolute text-xs text-gray-700 font-medium transform -translate-x-1/2"
-                                                                            style={{
-                                                                                left: `${x}%`,
-                                                                                bottom: '-20px'
-                                                                            }}
-                                                                        >
-                                                                            {point.zip}
-                                                                        </div>
-                                                                    );
-                                                                })}
-                                                            </div>
-
-                                                            {/* Legend */}
-                                                            <div className="absolute top-2 left-1/2 transform -translate-x-1/2 flex items-center gap-4 text-xs bg-white px-3 py-1 rounded shadow border">
-                                                                <div className="flex items-center gap-1">
-                                                                    <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                                                                    <span>Students</span>
-                                                                </div>
-                                                                <div className="flex items-center gap-1">
-                                                                    <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                                                                    <span>Schools</span>
-                                                                </div>
-                                                            </div>
-                                                        </>
+                                                        <div className="flex items-center justify-center h-48 text-muted-foreground text-sm border rounded">
+                                                            Select ZIP codes to see bar chart
+                                                        </div>
                                                     );
-                                                })()}
-                                            </div>
-                                            <div className="mt-2 text-xs text-muted-foreground text-center">
-                                                Two line charts showing trends across ZIP codes • Hover points for exact values
-                                            </div>
+                                                }
+
+                                                const chartConfig = {
+                                                    students: { label: 'Students', color: '#3b82f6' },
+                                                    schools: { label: 'Schools', color: '#ef4444' },
+                                                } as const;
+
+                                                return (
+                                                    <div className="w-full">
+                                                        <ChartContainer config={chartConfig} className="h-64 w-full">
+                                                            <ReBarChart data={dataPoints} margin={{ top: 10, right: 10, left: 10, bottom: 40 }}>
+                                                                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                                                                <XAxis dataKey="zip" tickLine={false} axisLine={false} interval={0} angle={-45} textAnchor="end" height={50} />
+                                                                <YAxis yAxisId="left" tickLine={false} axisLine={false} width={60} />
+                                                                <YAxis yAxisId="right" orientation="right" tickLine={false} axisLine={false} width={40} />
+                                                                <ChartTooltip content={<ChartTooltipContent />} />
+                                                                <ChartLegend content={<ChartLegendContent />} />
+                                                                <Bar yAxisId="left" dataKey="students" fill="var(--color-students)" radius={[4, 4, 0, 0]} />
+                                                                <Bar yAxisId="right" dataKey="schools" fill="var(--color-schools)" radius={[4, 4, 0, 0]} />
+                                                            </ReBarChart>
+                                                        </ChartContainer>
+                                                        <div className="mt-2 text-xs text-muted-foreground text-center">
+                                                            Grouped bar chart across ZIP codes • Separate axes for scale
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })()}
                                         </CardContent>
                                     </Card>
                                 </div>
